@@ -14,8 +14,13 @@ func TestClient_Send(t *testing.T) {
 
 	sms := NewSmsClient("", "", "")
 
-	sms.SetSignName("").
-		SetTemplateCode("").
-		SetRegionId("").
-		Send("", nil)
+	payload := map[string]interface{}{"code": "1234"}
+	if err := sms.
+		SetSignName("").
+		//SetTemplateCode("").
+		//SetRegionId("").
+		DebugMode().
+		Send("", payload); err != nil {
+		t.Log(err)
+	}
 }

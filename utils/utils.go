@@ -7,3 +7,9 @@
  */
 
 package utils
+
+import "strings"
+
+func IsNotEmpty(s string) bool {
+	return len(strings.TrimSpace(s)) > 0
+}

@@ -15,28 +15,29 @@ import (
 )
 
 type SmsClient struct {
-	KeyId        string
-	KeySecret    string
-	TemplateCode string
+	keyId        string
+	keySecret    string
+	templateCode string
+	debug        bool
 
-	SignName string
+	signName string
 
-	RegionId string
-	Domain   string
+	regionId string
+	domain   string
 }
 
 func NewSmsClient(keyId, keySecret, templateCode string) *SmsClient {
 
 	return &SmsClient{
-		KeyId:        keyId,
-		KeySecret:    keySecret,
-		TemplateCode: templateCode,
-		RegionId:     "cn-hangzhou",
+		keyId:        keyId,
+		keySecret:    keySecret,
+		templateCode: templateCode,
+		regionId:     "cn-hangzhou",
 	}
 }
 
 func (s *SmsClient) Send(phone string, payload map[string]interface{}) error {
-	client, err := dysmsapi.NewClientWithAccessKey(s.RegionId, s.KeyId, s.KeySecret)
+	client, err := dysmsapi.NewClientWithAccessKey(s.regionId, s.keyId, s.keySecret)
 	if err != nil {
 		return err
 	}
@@ -46,8 +47,8 @@ func (s *SmsClient) Send(phone string, payload map[string]interface{}) error {
 	request.Scheme = "https"
 	request.Domain = "dysmsapi.aliyuncs.com"
 
-	request.SignName = s.SignName
-	request.TemplateCode = s.TemplateCode
+	request.SignName = s.signName
+	request.TemplateCode = s.templateCode
 
 	request.PhoneNumbers = phone
 	data, _ := json.Marshal(payload)
@@ -55,10 +56,15 @@ func (s *SmsClient) Send(phone string, payload map[string]interface{}) error {
 
 	response, err := client.SendSms(request)
 	if err != nil {
-		fmt.Println(err)
+		if s.debug {
+			fmt.Println(err)
+		}
+		return err
 	}
 
-	fmt.Println(response)
+	if s.debug {
+		fmt.Println(response)
+	}
 
 	return nil
 }
@@ -66,23 +72,28 @@ func (s *SmsClient) Send(phone string, payload map[string]interface{}) error {
 func (s *SmsClient) SetRegionId(regionId string) *SmsClient {
 	// - [dysmsapi 在某种情况下会请求错误地址 · Issue #492 · aliyun/alibaba-cloud-sdk-go](https://github.com/aliyun/alibaba-cloud-sdk-go/issues/492)
 	if regionId == "cn-beijing" {
-		s.Domain = "dysmsapi.aliyuncs.com"
+		s.domain = "dysmsapi.aliyuncs.com"
 	}
-	s.RegionId = regionId
+	s.regionId = regionId
 	return s
 }
 
 func (s *SmsClient) SetSignName(signName string) *SmsClient {
-	s.SignName = signName
+	s.signName = signName
 	return s
 }
 
 func (s *SmsClient) SetTemplateCode(code string) *SmsClient {
-	s.TemplateCode = code
+	s.templateCode = code
 	return s
 }
 
 func (s *SmsClient) SetDomain(domain string) *SmsClient {
-	s.Domain = domain
+	s.domain = domain
+	return s
+}
+
+func (s *SmsClient) DebugMode() *SmsClient {
+	s.debug = true
 	return s
 }

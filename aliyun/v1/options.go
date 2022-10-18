@@ -8,7 +8,6 @@
 
 package v1
 
-
 import (
 	"encoding/json"
 
@@ -77,4 +76,3 @@ func SignName(n string) Option {
 func Template(t string) Option {
 	return QueryParam("TemplateCode", t)
 }
-
